@@ -1,12 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Button, List } from 'react-native-paper';
+import { View, Text, Button, StyleSheet, FlatList } from 'react-native';
 
 interface FavoritesProps {
-  favorites: Array<{
-    city: string;
-    temp: number;
-  }>;
+  favorites: Array<any>;
   onRemoveFavorite: (index: number) => void;
   onShowWeather: (city: string) => void;
 }
@@ -15,47 +11,39 @@ const Favorites: React.FC<FavoritesProps> = ({ favorites, onRemoveFavorite, onSh
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Favorites</Text>
-      <List.Section>
-        {favorites.map((favorite, index) => (
-          <List.Item
-            key={index}
-            title={favorite.city}
-            description={`Temperature: ${favorite.temp}°C`}
-            left={() => <List.Icon icon="weather-sunny" />}
-            right={() => (
-              <View style={styles.buttonContainer}>
-                <Button
-                  icon="eye"
-                  onPress={() => onShowWeather(favorite.city)}
-                >
-                  Show Weather
-                </Button>
-                <Button
-                  icon="delete"
-                  onPress={() => onRemoveFavorite(index)}
-                >
-                  Remove
-                </Button>
-              </View>
-            )}
-          />
-        ))}
-      </List.Section>
+      <FlatList
+        data={favorites}
+        keyExtractor={(index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.favoriteItem}>
+            <Text>{item.city}</Text>
+            <Button title="Show Weather" onPress={() => onShowWeather(item.city)} />
+            <Button title="Remove" onPress={() => onRemoveFavorite(index)} />
+          </View>
+        )}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  buttonContainer: {
+  favoriteItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
   },
 });
 
