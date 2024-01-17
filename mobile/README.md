@@ -36,7 +36,9 @@ npm install
 3. Start the Expo development server:
 
 ```bash
-npx expo start
+expo start --web
 ```
+
+It's easiest to test on Web version as server is working on the same computer. It should also work in emulator, but wasn't tested that way.
 
 4. Scan the QR code using the Expo Go app on your mobile device or run on an emulator.

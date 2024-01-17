@@ -5,13 +5,12 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import WeatherCard from './components/WeatherCard';
 import Favorites from './components/Favorites';
 import { getFavorites, saveFavorite, removeFavorite } from './utils/storage';
-import { API_KEY } from '@env';
 
-const App: React.FC<any> = () => {
+const App = () => {
   const [searchInput, setSearchInput] = useState('');
   const [city, setCity] = useState('');
-  const [weatherData, setWeatherData] = useState<any>({});
-  const [favorites, setFavorites] = useState<Array<any>>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData>();
+  const [favorites, setFavorites] = useState<Array<Favorite>>([]);
 
   useEffect(() => {
     loadFavorites();
@@ -25,26 +24,12 @@ const App: React.FC<any> = () => {
   const fetchWeatherData = async (city: string) => {
     if (city) {
       try {
-        const geoCodingResponse = await axios.get(
-          `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`
-        );
-
-        const location = geoCodingResponse.data[0];
-
         const weatherResponse = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&units=metric&appid=${API_KEY}`
+          `http://localhost:3000/weather?city=${city}`
         );
-
-        const { main, wind, weather } = weatherResponse.data;
-        const newWeatherData = {
-          temp: main.temp,
-          humidity: main.humidity,
-          windSpeed: wind.speed,
-          conditions: weather[0].description,
-        };
-
-        setWeatherData(newWeatherData);
+        const newWeatherData = weatherResponse.data;
         setCity(city);
+        setWeatherData(newWeatherData);
       } catch (error) {
         console.error('Error fetching weather data:', error);
       }
@@ -52,10 +37,10 @@ const App: React.FC<any> = () => {
   };
 
   const addToFavorites = () => {
-    if (city !== '' && !favorites.some(favorite => favorite.city === city)) {
-      const newFavorite = {
+    if (city && weatherData && !favorites.some(favorite => favorite.city === city)) {
+      const newFavorite: Favorite = {
         city,
-        ...weatherData,
+        weather: weatherData,
       };
 
       saveFavorite(newFavorite);
@@ -83,7 +68,7 @@ const App: React.FC<any> = () => {
               onChangeText={(text) => setSearchInput(text)}
             />
             <Button title="Get Weather" onPress={() => fetchWeatherData(searchInput)} />
-            {Object.keys(weatherData).length > 0 && (
+            {weatherData && (
               <>
                 <WeatherCard city={city} weatherData={weatherData} />
                 <Button title="Add to Favorites" onPress={addToFavorites} />
