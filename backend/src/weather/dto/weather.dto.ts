@@ -1,7 +1,7 @@
-import {IsNotEmpty, IsString, IsNumber} from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
 export class WeatherDto {
-  
+
   @IsNotEmpty()
   @IsNumber()
   temp: number;
