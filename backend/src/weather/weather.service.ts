@@ -1,21 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { WeatherDto } from './dto/weather.dto';
 
 @Injectable()
 export class WeatherService {
-  private readonly apiKey = process.env.API_KEY;
 
-  async getWeather(city: string) {
-    const geoCodingResponse = await axios.get(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${this.apiKey}`,
-    );
+  getWeather(city: string): Promise<WeatherDto> {
+    const apiKey = process.env.API_KEY;
+    const url = `http://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
 
-    const location = geoCodingResponse.data[0];
-
-    const weatherResponse = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&units=metric&appid=${this.apiKey}`,
-    );
-
-    return weatherResponse.data;
+    return axios.get(url).then((response) => {
+        const { main, wind, weather } = response.data;
+        return {
+          temp: main.temp,
+          humidity: main.humidity,
+          windSpeed: wind.speed,
+          conditions: weather[0].description,
+        };
+      }, (error) => {
+        console.error('Error fetching weather data:', error);
+        throw error;
+      });
+    
   }
 }
